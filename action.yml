@@ -1,0 +1,5 @@
+name: "ToTheos Action"
+description: "Executes a ToTheos workflow task"
+runs:
+  using: "node20"
+  main: "dist/index.js"
