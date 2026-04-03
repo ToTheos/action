@@ -48,29 +48,55 @@ const child_process_1 = __nccwpck_require__(317);
 const fs = __importStar(__nccwpck_require__(896));
 const path_1 = __importDefault(__nccwpck_require__(928));
 const stream_1 = __nccwpck_require__(203);
+const promises_1 = __nccwpck_require__(786);
 async function downloadFile(url, outputDir = '.') {
     const fileName = path_1.default.basename(new URL(url).pathname);
     const outputPath = path_1.default.join(outputDir, fileName);
+    const tmpPath = outputPath + '.tmp';
     await fs.promises.mkdir(outputDir, { recursive: true });
     const res = await fetch(url, { redirect: 'follow' });
     if (!res.ok || !res.body) {
         throw new Error(`Failed to download file: ${res.status} ${res.statusText}`);
     }
     const nodeStream = stream_1.Readable.from(res.body);
-    await new Promise((resolve, reject) => {
-        const fileStream = fs.createWriteStream(outputPath);
-        nodeStream.pipe(fileStream);
-        nodeStream.on('error', reject);
-        fileStream.on('finish', () => resolve());
-        fileStream.on('error', reject);
-    });
+    const fileStream = fs.createWriteStream(tmpPath);
+    nodeStream.pipe(fileStream);
+    // Wait until fully written + closed
+    await (0, promises_1.finished)(fileStream);
+    // Ensure executable permissions BEFORE rename (optional but clean)
+    fs.chmodSync(tmpPath, 0o755);
+    // Atomic replace
+    fs.renameSync(tmpPath, outputPath);
     return outputPath;
+}
+async function spawnWithRetry(filePath, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const child = (0, child_process_1.spawn)(filePath, [], { stdio: 'inherit' });
+            return child;
+        }
+        catch (err) {
+            if (err.code === 'ETXTBSY') {
+                await new Promise((r) => setTimeout(r, 100));
+                continue;
+            }
+            throw err;
+        }
+    }
+    throw new Error(`Failed to spawn ${filePath} after ${retries} retries`);
 }
 async function run() {
     const filePath = await downloadFile('https://github.com/totheos/action/releases/latest/download/totheos', '/tmp');
-    fs.chmodSync(filePath, 0o755);
-    const child = (0, child_process_1.spawn)(filePath, [], { stdio: 'inherit' });
-    child.on('exit', (code) => { process.exit(code !== null && code !== void 0 ? code : 1); });
+    // Small delay (extra safety for CI environments)
+    await new Promise((r) => setTimeout(r, 50));
+    const child = await spawnWithRetry(filePath);
+    child.on('exit', (code) => {
+        process.exit(code !== null && code !== void 0 ? code : 1);
+    });
+    child.on('error', (err) => {
+        console.error('Failed to start process:', err);
+        process.exit(1);
+    });
 }
 run();
 
@@ -102,6 +128,13 @@ module.exports = require("path");
 /***/ ((module) => {
 
 module.exports = require("stream");
+
+/***/ }),
+
+/***/ 786:
+/***/ ((module) => {
+
+module.exports = require("stream/promises");
 
 /***/ })
 
