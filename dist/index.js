@@ -1,3 +1,5 @@
+/* © 2026 Softensify Pty Ltd */
+
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
