@@ -51,6 +51,7 @@ const fs = __importStar(__nccwpck_require__(896));
 const path_1 = __importDefault(__nccwpck_require__(928));
 const stream_1 = __nccwpck_require__(203);
 const promises_1 = __nccwpck_require__(786);
+const os_1 = __importDefault(__nccwpck_require__(857));
 async function downloadFile(url, outputDir = '.') {
     const fileName = path_1.default.basename(new URL(url).pathname);
     const outputPath = path_1.default.join(outputDir, fileName);
@@ -87,8 +88,20 @@ async function spawnWithRetry(filePath, retries = 3) {
     }
     throw new Error(`Failed to spawn ${filePath} after ${retries} retries`);
 }
+function getBinaryName() {
+    switch (os_1.default.arch()) {
+        case 'x64':
+            return 'totheos-linux-x64';
+        case 'arm64':
+            return 'totheos-linux-arm64';
+        default:
+            throw new Error(`Unsupported architecture: ${os_1.default.arch()}`);
+    }
+}
 async function run() {
-    const filePath = await downloadFile('https://github.com/totheos/action/releases/latest/download/totheos', '/tmp');
+    const url = `https://github.com/totheos/action/releases/latest/download/${getBinaryName()}`;
+    const filePath = await downloadFile(url, '/tmp');
+    console.log(filePath);
     // Small delay (extra safety for CI environments)
     await new Promise((r) => setTimeout(r, 50));
     const child = await spawnWithRetry(filePath);
@@ -116,6 +129,13 @@ module.exports = require("child_process");
 /***/ ((module) => {
 
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ 857:
+/***/ ((module) => {
+
+module.exports = require("os");
 
 /***/ }),
 
